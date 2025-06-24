@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      {% if error %}Error{% elif studentDetails %}Student Data{% elif
+      courseDetails %}Course Data{% else %}Enter Details{% endif %}
+    </title>
+  </head>
+  <body>
+    {% if error %}
+    <h1>{{ error }}</h1>
+    <p>Something Went Wrong</p>
+    <div>
+      <a href="/">Go Back</a>
+    </div>
+    {% elif studentDetails %}
+    <h1>Student Details</h1>
+    <table border="2">
+      <tr>
+        <th>Student Id</th>
+        <th>Course Id</th>
+        <th>Marks</th>
+      </tr>
+      {% for student in studentDetails %}
+      <tr>
+        <td>{{ student[0] }}</td>
+        <td>{{ student[1] }}</td>
+        <td>{{ student[2] }}</td>
+      </tr>
+      {% endfor %}
+      <tr>
+        <td colspan="2">Total Marks</td>
+        <td>{{ totalMarks }}</td>
+      </tr>
+    </table>
+    <div>
+      <a href="/">Go Back</a>
+    </div>
+    {% elif courseDetails %}
+    <h1>Course Details</h1>
+    <table border="2">
+      <tr>
+        <th>Average Marks</th>
+        <th>Maximum Marks</th>
+      </tr>
+      <tr>
+        <td>{{ courseDetails.average_marks }}</td>
+        <td>{{ courseDetails.maximum_marks }}</td>
+      </tr>
+    </table>
+    <img
+      src="static/course.png"
+      alt="Course Image"
+      style="width: 500px; height: 400px"
+    />
+    <div>
+      <a href="/">Go Back</a>
+    </div>
+    {% else %}
+    <form method="POST" action="/" id="data-form">
+      <h1 style="padding: 10px">Enter the Details</h1>
+      <input type="radio" name="student_id" />
+      <label for="student_id">Student ID</label>
+      <input type="radio" name="course_id" />
+      <label for="course_id">Course ID</label>
+      <input type="text" name="value" required />
+      <input type="submit" value="Submit" />
+    </form>
+    {% endif %}
+  </body>
+</html>
