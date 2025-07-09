@@ -43,6 +43,7 @@ def student(student_id: str) -> tuple:
 
 
 def get_data() -> list:
+
     try:
         with open("data.csv", "r") as file:
             reader = csv.reader(file)
@@ -58,6 +59,9 @@ def home():
         course_id = request.form.get("course_id")
         student_id = request.form.get("student_id")
         value = request.form.get("value")
+
+        if not value:
+            return render_template("index.html", error="Wrong Inputs")
 
         if student_id:
             student_records, total_marks = student(value)

@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>
-      {% if error %}Error{% elif studentDetails %}Student Data{% elif
-      courseDetails %}Course Data{% else %}Enter Details{% endif %}
+      {% if error %}Something Went Wrong{% elif studentDetails %}Student Data{%
+      elif courseDetails %}Course Data{% else %}Enter Details{% endif %}
     </title>
   </head>
   <body>
@@ -17,10 +17,10 @@
     </div>
     {% elif studentDetails %}
     <h1>Student Details</h1>
-    <table border="2">
+    <table border="2" id="student-details-table">
       <tr>
-        <th>Student Id</th>
-        <th>Course Id</th>
+        <th>Student ID</th>
+        <th>Course ID</th>
         <th>Marks</th>
       </tr>
       {% for student in studentDetails %}
@@ -31,7 +31,7 @@
       </tr>
       {% endfor %}
       <tr>
-        <td colspan="2">Total Marks</td>
+        <td colspan="2" style="text-align: center">Total Marks</td>
         <td>{{ totalMarks }}</td>
       </tr>
     </table>
@@ -40,7 +40,7 @@
     </div>
     {% elif courseDetails %}
     <h1>Course Details</h1>
-    <table border="2">
+    <table border="2" id="course-details-table">
       <tr>
         <th>Average Marks</th>
         <th>Maximum Marks</th>
@@ -61,11 +61,11 @@
     {% else %}
     <form method="POST" action="/" id="data-form">
       <h1 style="padding: 10px">Enter the Details</h1>
-      <input type="radio" name="student_id" />
+      <input type="radio" name="student_id" id="student_id" />
       <label for="student_id">Student ID</label>
-      <input type="radio" name="course_id" />
+      <input type="radio" name="course_id" id="course_id" />
       <label for="course_id">Course ID</label>
-      <input type="text" name="value" required />
+      <input type="text" name="value" />
       <input type="submit" value="Submit" />
     </form>
     {% endif %}
