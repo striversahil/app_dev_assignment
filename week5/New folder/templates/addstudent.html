@@ -6,9 +6,16 @@
     <title>Add Student</title>
   </head>
   <body>
+
+    {% if already %}
+    <p>Student already exist. Please use different Roll Number!.</p>
+
+    <a href="/">Go Back</a>
+
+    {% else %}
     <h1>Add a Student</h1>
 
-    <form method="post">
+    <form method="post"id="create-form">
       <label for="roll">Roll Number :</label>
       <input type="text" name="roll" id="roll" />
       <div></div>
@@ -16,15 +23,17 @@
       <input type="text" name="first" id="first" />
       <div></div>
       <label for="last">Last Name :</label>
-      <input type="text" name="last" id="last" />
+      <input type="text" name="last" id="last" />   
       <div></div> 
       <label for="course">Select Courses : </label>
-    <input type="checkbox" name="course" value="MAD 1">MAD 1</input>
-    <input type="checkbox" name="course" value="DBMS">DBMS</input>
-    <input type="checkbox" name="course" value="PDSA">PDSA</input> 
-    <input type="checkbox" name="course" value="DBMS">DBMS</input>
+    <input type="checkbox" name="course" value="CSE01">MAD 1</input>
+    <input type="checkbox" name="course" value="CSE02">DBMS</input>
+    <input type="checkbox" name="course" value="CSE03">PDSA</input> 
+    <input type="checkbox" name="course" value="BST13">BDM</input>
     <div></div>
     <button type="submit">Submit</button>
     </form>
+
+    {% endif %}
   </body>
 </html>

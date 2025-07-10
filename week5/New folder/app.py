@@ -82,6 +82,11 @@ def addstudent():
         courses = request.form.getlist("course")
         if not roll or not first or not last or not courses:
             return redirect(url_for("home"))
+
+        already = Student.query.filter_by(roll_number=roll).first()
+        if already:
+            return render_template("addstudent.html", already=True)
+
         student = Student(roll_number=roll, first_name=first, last_name=last)
         db.session.add(student)
         db.session.commit()
@@ -94,6 +99,28 @@ def addstudent():
         return redirect(url_for("home"))
 
     return render_template("addstudent.html")
+
+
+@app.route("/student/<int:studentId>/update", methods=["GET", "POST"])
+def update(studentId):
+    student = Student.query.filter_by(student_id=studentId).first()
+    if not student:
+        return redirect(url_for("home"))
+
+    if request.method == "POST":
+        roll = request.form.get("roll")
+        first = request.form.get("first")
+        last = request.form.get("last")
+        courses = request.form.getlist("course")
+        if not roll or not first or not last or not courses:
+            return redirect(url_for("home"))
+        student.roll_number = roll
+        student.first_name = first
+        student.last_name = last
+        db.session.commit()
+
+    print(student)
+    return render_template("addstudent.html", student=student)
 
 
 @app.route("/", methods=["GET", "POST"])
