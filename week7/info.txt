@@ -1,0 +1,5 @@
+https://discourse.onlinedegree.iitm.ac.in/t/week-5-lab-assignment-all-test-cases-failing/180897/14
+
+All of my testcases passed now.
+Make sure to create schema and populate the course table before submitting and put it in the instance folder and
+Don’t delete and then add same course again in the update form
