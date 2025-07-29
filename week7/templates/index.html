@@ -6,14 +6,37 @@
     <title>Home</title>
   </head>
   <body>
-    <h1>Welcome to the Course Management System</h1>
-    <p>
-      This is the home page. You can add students and view courses from here.
-    </p>
-    <ul>
-      <li><a href="/students">View Students</a></li>
-      <li><a href="/courses">View Courses</a></li>
-      <li><a href="/enrollments">View Enrollments</a></li>
-    </ul>
+    <h1>Student list</h1>
+    {% if students %}
+    <table id="all-students">
+      <tr>
+        <th>SNo</th>
+        <th>Roll Number</th>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Actions</th>
+      </tr>
+      {% for student in students %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>
+          <a href="/student/{{ student.student_id }}"
+            >{{ student.roll_number }}</a
+          >
+        </td>
+        <td>{{ student.first_name }}</td>
+        <td>{{ student.last_name }}</td>
+        <td>
+          <a href="/student/{{ student.student_id }}/update">Update</a>
+          <a href="/student/{{ student.student_id }}/delete">Delete</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+    {% else %}
+    <p>No students found. Add the students now!.</p>
+    {% endif %}
+
+    <a href="/student/create" style="margin-left: 100px">+Add Student</a>
   </body>
 </html>

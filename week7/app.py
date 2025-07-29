@@ -48,7 +48,7 @@ def courses():
     return render_template("courses.html", courses=courses)
 
 
-@app.route("/courses/create", methods=["GET", "POST"])
+@app.route("/course/create", methods=["GET", "POST"])
 def create_course():
     if request.method == "POST":
         course_name = request.form.get("course_name")
@@ -74,7 +74,7 @@ def create_course():
     return render_template("create_course.html")
 
 
-@app.route("/courses/<int:course_id>", methods=["GET"])
+@app.route("/course/<int:course_id>", methods=["GET"])
 def course_detail(course_id):
     # This route would display the details of a specific course along with its enrolled students
     # If course does not exist, it would return an error message
@@ -88,7 +88,7 @@ def course_detail(course_id):
         return render_template("course_detail.html", error="Course not found.")
 
 
-@app.route("/courses/<int:course_id>/update", methods=["GET", "POST"])
+@app.route("/course/<int:course_id>/update", methods=["GET", "POST"])
 def update_course(course_id):
     # This route would handle updating an existing course's information
     # If course does not exist, it would return an error message
@@ -106,7 +106,7 @@ def update_course(course_id):
     return render_template("update_course.html", course_id=course_id)
 
 
-@app.route("/students/create", methods=["GET", "POST"])
+@app.route("/student/create", methods=["GET", "POST"])
 def create_student():
     # This route would handle the creation of a new student
     # If student exists, it would return an error message
@@ -131,40 +131,55 @@ def create_student():
     return render_template("create_student.html")
 
 
-@app.route("/students/<int:student_id>", methods=["GET"])
+@app.route("/student/<int:student_id>", methods=["GET"])
 def student_detail(student_id):
     # This route would display the details of a specific student
     # If student does not exist, it would return an error message
     student = Student.query.get(student_id)
+    courses = (
+        Course.query.join(Enrollment).filter(Enrollment.estudent_id == student_id).all()
+    )
+
     if student:
-        return render_template("student_detail.html", student=student)
+        return render_template("student_detail.html", student=student, courses=courses)
     else:
         return "Student not found", 404
 
 
-@app.route("/students/<int:student_id>/update", methods=["GET", "POST"])
+@app.route("/student/<int:student_id>/update", methods=["GET", "POST"])
 def update_student(student_id):
     # This route would handle updating an existing student's information
     # If student does not exist, it would return an error message
+    courses = Course.query.all()
+    student = Student.query.get(student_id)
     if request.method == "POST":
-        student = Student.query.get(student_id)
+        enrollment = Enrollment.query.filter_by(estudent_id=student_id).first()
         if not student:
             return render_template("update_student.html", error="Student not found.")
 
         student.roll_number = request.form.get("roll_number")
         student.first_name = request.form.get("first_name")
         student.last_name = request.form.get("last_name")
+        if enrollment:
+            enrollment.ecourse_id = request.form.get("course_id")
+        else:
+            new_enrollment = Enrollment(
+                estudent_id=student_id, ecourse_id=request.form.get("course_id")
+            )
+            db.session.add(new_enrollment)
 
         db.session.commit()
         return redirect(url_for("index"))
-    return render_template("update_student.html", student_id=student_id)
+    return render_template("update_student.html", student=student, courses=courses)
 
 
 with app.app_context():
-    if not os.path.exists("week7_database.sqlite3"):
+    if not os.path.exists("instance/week7_database.sqlite3"):
         print("Creating the database...")
         db.create_all()
         print("Database created successfully.")
+    else:
+        print("Database already exists.")
 
 
 if __name__ == "__main__":
