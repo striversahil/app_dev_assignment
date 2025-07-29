@@ -6,23 +6,28 @@
     <title>Create Student</title>
   </head>
   <body>
+    {% if error %}
+    <p>Student already exists. Please use a different roll number.</p>
+    <a href="/">Go Home</a>
+    {% else %}
     <h1>Create Student</h1>
     <form action="/student/create" method="POST" id="create-student-form">
       <div>
         <label>Roll Number:</label>
-        <input type="text" name="roll_number" required />
+        <input type="text" name="roll" required />
       </div>
       <div>
         <label>First Name:</label>
-        <input type="text" name="first_name" required />
+        <input type="text" name="f_name" required />
       </div>
       <div>
         <label>Last Name:</label>
-        <input type="text" name="last_name" />
+        <input type="text" name="l_name" />
       </div>
       <div>
         <input type="submit" value="Submit" />
       </div>
     </form>
+    {% endif %}
   </body>
 </html>

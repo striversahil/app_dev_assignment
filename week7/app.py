@@ -19,8 +19,8 @@ class Student(db.Model):
 
 class Course(db.Model):
     course_id = Column(Integer, primary_key=True, autoincrement=True)
-    course_name = Column(String(100), nullable=False)
     course_code = Column(String(20), unique=True, nullable=False)
+    course_name = Column(String(100), nullable=False)
     course_description = Column(String(255), nullable=True)
 
 
@@ -37,7 +37,7 @@ class Enrollment(db.Model):
 def index():
     # It will render all student or Add a student and go to the courses page
     students = Student.query.all()
-    return render_template("index.html", students=students)
+    return render_template("index.html", students=students), 200
 
 
 @app.route("/courses", methods=["GET"])
@@ -45,15 +45,15 @@ def courses():
     # This route would display a list of all courses
     # If no courses exist, it would return an empty list or a message
     courses = Course.query.all()
-    return render_template("courses.html", courses=courses)
+    return render_template("courses.html", courses=courses), 200
 
 
 @app.route("/course/create", methods=["GET", "POST"])
 def create_course():
     if request.method == "POST":
-        course_name = request.form.get("course_name")
-        course_code = request.form.get("course_code")
-        course_description = request.form.get("course_description")
+        course_name = request.form.get("c_name")
+        course_code = request.form.get("code")
+        course_description = request.form.get("desc")
 
         existing_course = Course.query.filter_by(course_code=course_code).first()
         if existing_course:
@@ -71,7 +71,21 @@ def create_course():
         return redirect(url_for("courses"))
     # This route would handle the creation of a new course
     # If course exists, it would return an error message
-    return render_template("create_course.html")
+    return render_template("create_course.html"), 200
+
+
+@app.route("/course/<int:course_id>/delete", methods=["GET"])
+def delete_course(course_id):
+    course = Course.query.get(course_id)
+    if course:
+        enrollments = Enrollment.query.filter_by(ecourse_id=course_id).all()
+        for enrollment in enrollments:
+            db.session.delete(enrollment)
+        db.session.delete(course)
+        db.session.commit()
+        return redirect(url_for("courses"))
+    else:
+        return "Course not found", 404
 
 
 @app.route("/course/<int:course_id>", methods=["GET"])
@@ -83,27 +97,29 @@ def course_detail(course_id):
         Student.query.join(Enrollment).filter(Enrollment.ecourse_id == course_id).all()
     )
     if course:
-        return render_template("course_detail.html", course=course, students=students)
+        return (
+            render_template("course_detail.html", course=course, students=students),
+            200,
+        )
     else:
-        return render_template("course_detail.html", error="Course not found.")
+        return render_template("course_detail.html", error="Course not found."), 404
 
 
 @app.route("/course/<int:course_id>/update", methods=["GET", "POST"])
 def update_course(course_id):
     # This route would handle updating an existing course's information
     # If course does not exist, it would return an error message
+    course = Course.query.get(course_id)
     if request.method == "POST":
-        course = Course.query.get(course_id)
         if not course:
             return render_template("update_course.html", error="Course not found.")
 
-        course.course_name = request.form.get("course_name")
-        course.course_code = request.form.get("course_code")
-        course.course_description = request.form.get("course_description")
+        course.course_name = request.form.get("c_name")
+        course.course_description = request.form.get("desc")
 
         db.session.commit()
         return redirect(url_for("courses"))
-    return render_template("update_course.html", course_id=course_id)
+    return render_template("update_course.html", course=course), 200
 
 
 @app.route("/student/create", methods=["GET", "POST"])
@@ -111,15 +127,18 @@ def create_student():
     # This route would handle the creation of a new student
     # If student exists, it would return an error message
     if request.method == "POST":
-        roll_number = request.form.get("roll_number")
-        first_name = request.form.get("first_name")
-        last_name = request.form.get("last_name")
+        roll_number = request.form.get("roll")
+        first_name = request.form.get("f_name")
+        last_name = request.form.get("l_name")
 
         existing_student = Student.query.filter_by(roll_number=roll_number).first()
         if existing_student:
-            return render_template(
-                "create_student.html",
-                error="Student with this roll number already exists.",
+            return (
+                render_template(
+                    "create_student.html",
+                    error="Student with this roll number already exists.",
+                ),
+                200,
             )
 
         new_student = Student(
@@ -127,8 +146,24 @@ def create_student():
         )
         db.session.add(new_student)
         db.session.commit()
-        return redirect(url_for("index"))
+        return redirect(url_for("index")), 201
     return render_template("create_student.html")
+
+
+@app.route("/student/<int:student_id>/delete", methods=["GET"])
+def delete_student(student_id):
+    # This route would handle the deletion of a student
+    # If student does not exist, it would return an error message
+    student = Student.query.get(student_id)
+    if student:
+        enrollment = Enrollment.query.filter_by(estudent_id=student_id).first()
+        if enrollment:
+            db.session.delete(enrollment)
+        db.session.delete(student)
+        db.session.commit()
+        return redirect(url_for("index"))
+    else:
+        return "Student not found", 404
 
 
 @app.route("/student/<int:student_id>", methods=["GET"])
@@ -141,7 +176,10 @@ def student_detail(student_id):
     )
 
     if student:
-        return render_template("student_detail.html", student=student, courses=courses)
+        return (
+            render_template("student_detail.html", student=student, courses=courses),
+            200,
+        )
     else:
         return "Student not found", 404
 
@@ -155,31 +193,37 @@ def update_student(student_id):
     if request.method == "POST":
         enrollment = Enrollment.query.filter_by(estudent_id=student_id).first()
         if not student:
-            return render_template("update_student.html", error="Student not found.")
+            return (
+                render_template("update_student.html", error="Student not found."),
+                404,
+            )
 
-        student.roll_number = request.form.get("roll_number")
-        student.first_name = request.form.get("first_name")
-        student.last_name = request.form.get("last_name")
+        student.first_name = request.form.get("f_name")
+        student.last_name = request.form.get("l_name")
         if enrollment:
-            enrollment.ecourse_id = request.form.get("course_id")
+            enrollment.ecourse_id = int(request.form.get("course"))
         else:
             new_enrollment = Enrollment(
-                estudent_id=student_id, ecourse_id=request.form.get("course_id")
+                estudent_id=student_id, ecourse_id=int(request.form.get("course"))
             )
             db.session.add(new_enrollment)
 
         db.session.commit()
         return redirect(url_for("index"))
-    return render_template("update_student.html", student=student, courses=courses)
+    return render_template("update_student.html", student=student, courses=courses), 200
 
 
-with app.app_context():
-    if not os.path.exists("instance/week7_database.sqlite3"):
-        print("Creating the database...")
-        db.create_all()
-        print("Database created successfully.")
+@app.route("/student/<int:student_id>/withdraw/<int:course_id>", methods=["GET"])
+def withdraw_student(student_id, course_id):
+    enrollment = Enrollment.query.filter_by(
+        estudent_id=student_id, ecourse_id=course_id
+    ).first()
+    if enrollment:
+        db.session.delete(enrollment)
+        db.session.commit()
+        return redirect(url_for("student_detail", student_id=student_id))
     else:
-        print("Database already exists.")
+        return "Enrollment not found", 404
 
 
 if __name__ == "__main__":
